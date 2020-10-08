@@ -92,7 +92,7 @@ function getPostsByUserId(userId) {
 
     // 3. and return it all together!!!    
 }
-getPostsByUserId(2);
+
 
 // Write the following, please!
 
@@ -113,4 +113,11 @@ getPostsByUserId(2);
 
 // OK to leave this out for an express app.
 // We want this for our command-line app.
-pgp.end();
+
+
+getPostsByUserId(2);
+
+
+
+
+// pgp.end();
