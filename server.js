@@ -39,6 +39,19 @@ function getAllUsers() {
     })
 }
 
+function getUserById(userId) {    
+    return db.one(`
+            select * from users
+                where id = $1
+            `, userId)
+            .then(user => {
+                return user;
+            })
+            .catch(e => {
+                console.log(e);
+            })
+}
+
 // Get all posts
 function getAllPosts() {
     db.many(`
@@ -56,19 +69,28 @@ function getAllPosts() {
 
 // Get all posts by a specific user
 function getPostsByUserId(userId) {
+    // 1. Get the user
+    // 2. and get their posts    
     db.many(`
-        select * from posts
-	        where user_id = $1
-        ;        
+    select * from posts
+    where user_id = $1
+    ;        
     `, userId)
-    .then(posts => {
-        posts.forEach(post => {
-            console.log(`${post.id}: ${post.url}`);
+    .then(posts => {        
+        const userPromise = getUserById(userId);    
+        console.log(userPromise);
+        userPromise.then(theUser => {
+            // console.log(theUser);
+            posts.forEach((post, index) => {
+                console.log(`${theUser.name}: ${post.url}`);
+            })
         })
     })
     .catch(e => {
         console.log(e);
     })
+
+    // 3. and return it all together!!!    
 }
 getPostsByUserId(2);
 
