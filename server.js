@@ -94,6 +94,16 @@ function getPostsByUserId(userId) {
 }
 getPostsByUserId(2);
 
+// Write the following, please!
+
+// getAllComments
+// getAllCommentsByUserId
+
+// getAllCommentsWithUser
+// getPostsWithLikes
+
+
+
 // Create
 
 // Update
