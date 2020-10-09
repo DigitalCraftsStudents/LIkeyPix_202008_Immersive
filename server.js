@@ -5,7 +5,12 @@ const config = {
     database: 'likeypixdb'
 };
 
-const pgp = require('pg-promise')();
+const pgp = require('pg-promise')({
+    query: e => {
+        // print the SQL query
+        console.log(`QUERY: ${e.query}`);
+    }
+});
 const db = pgp(config);
 
 // Demo query from lecture slides
@@ -41,7 +46,7 @@ function getAllUsers() {
 
 function getUserById(userId) {    
     return db.one(`
-            select * from users
+            select name, email from users
                 where id = $1
             `, userId)
             .then(user => {
@@ -52,20 +57,55 @@ function getUserById(userId) {
             })
 }
 
+// const userPromise = getUserById(2);
+// userPromise.then(user => {
+//     console.log(user);
+// });
+
 // Get all posts
 function getAllPosts() {
-    db.many(`
+    console.log('starting getAllPosts()');
+    // 2. return the whole promise chain
+    return db.many(`
         select * from posts;
     `)
     .then((posts) => {
-        posts.forEach((post) => {
-            console.log(post.url);
-        })
+        console.log('I would be returning, but decided not to');
+        // 1. return on behalf of the promise chain
+        return posts;
+        // posts.forEach((post) => {
+        //     console.log(post.url);
+        // })
     })
     .catch((e) => {
         console.log(e);
     })
 }
+
+function getLikesForPostId(postId) {
+    return db.one(`
+                select count(*) from likes
+                    where post_id = $1
+            `, postId)
+            .then(({count}) => {
+                // Destructure as it is passed
+                // into the function.
+                // const {count} = countObject;
+                console.log(count);
+                return count;
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+}
+
+// const postsPromise = getAllPosts();
+// console.log(postsPromise);
+// console.log('that was postsPromise');
+// postsPromise.then((results) => { 
+//     console.log(results); 
+//     console.log('yep those are all the posts');
+// })
 
 // Get all posts by a specific user
 function getPostsByUserId(userId) {
@@ -101,8 +141,36 @@ function getPostsByUserId(userId) {
 
 // getAllCommentsWithUser
 // getPostsWithLikes
+function getPostsWithLikes() {
+    // We'll merge results from 2 promise chains
+    // into a single return value.
+    console.log('Inside getPostsWithLikes()');
+    getAllPosts()
+        .then(posts => {
+            console.log('I think it works...');
+            console.log(posts);
+            posts.forEach((post, index) => {
+                // ???
+                getLikesForPostId(post.id)
+                    .then(count => {
+                        // console.log(`The like count for post id ${post.id} is ${count}`);
+                        post.likes = count;
+                        // How do we know when to return?
+                        // How do we return to the outer outer .then?                  
+                    });
+                   
+            })
+        })
+        .catch(e => {
+            console.log(e);
+        })
 
-
+}
+getPostsWithLikes();
+// getLikesForPostId(1)
+//     .then(count => {
+//         console.log(`The like count for post id 2 is ${count}`);
+//     })
 
 // Create
 
@@ -115,7 +183,7 @@ function getPostsByUserId(userId) {
 // We want this for our command-line app.
 
 
-getPostsByUserId(2);
+// getPostsByUserId(2);
 
 
 
